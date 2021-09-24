@@ -1,33 +1,23 @@
 const express = require('express');
 const mysql = require('mysql');
-const { response } = require('../app');
-const connection = mysql.createConnection({
-  host: 's148.cyber-folks.pl',
-  user: 'goethe_eden-faceden',
-  password: '#-k^g%IaoK-AS5q2',
-  database: 'goethe_eden-faceden'
-});
-
-connection.connect(function(err) {
-  if (err) {
-    return console.error('error: ' + err.message);
-  }
-
-  console.log('Connected to the MySQL server.');
-});
+const { establishConnection } = require('../utils/connection');
 
 const router = express.Router();
 
-module.exports = router;
-
-userRouter.route('/form')
-    .post(function (req, res) {
+router.route('/form')
+    .post(async function (req, res) {
+        const connection = await establishConnection()
+            .catch(() => undefined);
+        
+        if (!connection) return res.sendStatus(500);
         
         addUser(req.user);
 
         req.answers.forEach(element => {
             addAnswer(element);
         });
+
+        connection.end();
 
         res.status(200)
             .send('success');
@@ -54,3 +44,5 @@ async function addUser(data) {
 
     })
 }
+
+module.exports = router;
