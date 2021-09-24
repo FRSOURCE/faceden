@@ -1,10 +1,10 @@
 {
-  "name": "faceden",
+  "name": "client",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "serve": "vite preview"
+    "serve": "yarn dev"
   },
   "dependencies": {
     "vue": "^3.2.13"

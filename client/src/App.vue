@@ -1,12 +1,24 @@
-<script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import HelloWorld from './components/HelloWorld.vue'
+<script lang="ts">
+import Form from './components/Form.vue'
+import { defineComponent } from 'vue'
+
+export default defineComponent({
+  name: 'App',
+  components: {
+    Form
+  },
+  setup() {
+    const array = ['uno', 'due', 'tre', 'quatro', 'cinque', 'sei', 'sette', 'otto', 'nove', 'dieci']
+    return {
+      array
+    }
+  }
+})
+
 </script>
 
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Hello Vue 3 + TypeScript + Vite" />
+  <Form :array="array" />
 </template>
 
 <style>
@@ -15,7 +27,8 @@ import HelloWorld from './components/HelloWorld.vue'
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: #0eff6e;
   margin-top: 60px;
+  background-color: #000000;
 }
 </style>
