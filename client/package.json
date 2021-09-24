@@ -4,9 +4,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "serve": "vite preview"
+    "serve": "dev"
   },
   "dependencies": {
+    "reset-css": "^5.0.1",
+    "sass": "^1.42.1",
+    "sass-loader": "^12.1.0",
     "vue": "^3.2.13"
   },
   "devDependencies": {
