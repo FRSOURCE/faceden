@@ -62,7 +62,7 @@ export default defineComponent({
         accept="image/png, image/jpeg"
       >
     </div>
-    <div :class="$style['btn']">
+    <div :class="$style['btns']">
       <button type="button" @click="question = question - 1" v-show="question !== 0">
         Wroc
       </button>
@@ -93,7 +93,7 @@ export default defineComponent({
   }
 }
 
-.btn {
+.btns {
   display: flex;
   justify-content: center;
 }
