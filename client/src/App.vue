@@ -10,7 +10,7 @@ export default defineComponent({
     ViewSwitch
   },
   setup() {
-    const array = ['uno', 'due', 'tre', 'quatro', 'cinque', 'sei', 'sette', 'otto', 'nove', 'dieci']
+    const array = [{id:1, question:'uno'},{id:2, question:'due'},{id:3, question:'tre'},{id:4, question:'quatro'},{id:5, question:'cinque'},{id:6, question:'sei'},{id:7, question:'sette'},{id:8, question:'otto'} ,{id:9, question:'nove'},{id:10, question:'dieci'}]
     return {
       array
     }
