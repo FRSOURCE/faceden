@@ -1,11 +1,13 @@
 <script lang="ts">
 import Form from './components/Form.vue'
+import StartingScreen from './components/StartingScreen.vue'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'App',
   components: {
-    Form
+    Form,
+    StartingScreen
   },
   setup() {
     const array = ['uno', 'due', 'tre', 'quatro', 'cinque', 'sei', 'sette', 'otto', 'nove', 'dieci']
@@ -18,17 +20,17 @@ export default defineComponent({
 </script>
 
 <template>
-  <Form :array="array" />
+  <section>
+    <StartingScreen />
+    <Form :array="array" />
+  </section>
 </template>
 
-<style>
-#app {
+<style lang="scss" src='../node_modules/reset-css/sass/_reset.scss'></style>
+
+<style lang="scss">
+body {
   font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #0eff6e;
-  margin-top: 60px;
-  background-color: #000000;
 }
 </style>
