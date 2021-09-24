@@ -1,0 +1,30 @@
+@use 'sass:math';
+
+$colorPrimary: #0eff6e;
+$colorSecondary: #fff;
+$colorSecondaryInverted: #000;
+
+$spacer: 1rem;
+
+$fontSizes: (
+  1: math.div(12, $font-size-html) * 1rem,
+  2: math.div(14, $font-size-html) * 1rem,
+  3: math.div(16, $font-size-html) * 1rem,
+  4: math.div(20, $font-size-html) * 1rem,
+  5: math.div(24, $font-size-html) * 1rem,
+  6: math.div(30, $font-size-html) * 1rem,
+  7: math.div(36, $font-size-html) * 1rem,
+  8: math.div(42, $font-size-html) * 1rem
+);
+
+$spacings: (
+  0: 0,
+  1: math.div(2, $font-size-html) * 1rem,
+  2: math.div(5, $font-size-html) * 1rem,
+  3: math.div(10, $font-size-html) * 1rem,
+  4: math.div(15, $font-size-html) * 1rem,
+  5: math.div(25, $font-size-html) * 1rem,
+  6: math.div(30, $font-size-html) * 1rem,
+  7: math.div(45, $font-size-html) * 1rem,
+  8: math.div(60, $font-size-html) * 1rem
+);
