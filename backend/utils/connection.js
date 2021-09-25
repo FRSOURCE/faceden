@@ -2,7 +2,7 @@ const mysql = require('mysql');
 
 exports.establishConnection = () => new Promise((resolve, reject) => {
     const connection = mysql.createConnection({
-        host: 's148.cyber-folks.pl',
+        host: process.env.IS_PROD ? 'localhost' : 's148.cyber-folks.pl',
         user: 'goethe_eden-faceden',
         password: '#-k^g%IaoK-AS5q2',
         database: 'goethe_eden-faceden',
@@ -20,4 +20,3 @@ exports.establishConnection = () => new Promise((resolve, reject) => {
         resolve(connection);
     });
 });
-
