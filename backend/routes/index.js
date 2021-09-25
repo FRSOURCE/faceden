@@ -13,11 +13,7 @@ router.route('/form')
         if (!connection) return res.sendStatus(500);
           
 
-        addUser(req.user);
-
-        req.answers.forEach(element => {
-            addAnswer(element);
-        });
+        addUser(req);
 
         connection.end();
 
@@ -27,10 +23,10 @@ router.route('/form')
 
 
 function compare( a, b ) {
-  if ( a.userCount < b.userCount ){
+  if ( a.user_count < b.user_count ){
     return -1;
   }
-  if ( a.userCount > b.userCount ){
+  if ( a.user_count > b.user_count ){
     return 1;
   }
   return 0;
@@ -47,24 +43,50 @@ function addAnswer(data, userId) {
 }
 
 async function addUser(data) {
-    const user = data;
+    
+  const user = data.user;
+  const answers = data.answers;
 
-    // check available teams
+  // check available teams
 
-    const availableTeams = [];
+  const teamQuery = 'SELECT id, user_count from teams LEFT JOIN (SELECT team_id, COUNT(*) AS user_count FROM users GROUP BY team_id) team_counts ON teams.id = team_counts.team_id;';
+  
+  connection.query(teamQuery, async (err, response) => {
+      if(err) return console.log(err);
+      
+      let userCount = response;
+      userCount.sort((a,b) => a.user_count - b.user_count );
 
-    let teamQuery = 'SELECT team_id, COUNT(*) AS userCount FROM users GROUP BY team_id';
-    connection.query(teamQuery, (err, response) => {
-        if(err) return console.log(err);
+      console.log(response);
 
-        for (i = 0; i < response.length; ++i) {
-          availableTeams.push({"team_id": response[i].team_id, "userCount": response[i].userCount})
-        }
-    });
+      const addUserQuery = 'INSERT INTO users (??, ??, ??, ??) value (?, ?, ?, ?)';
+      const userQuery = mysql.format(addUserQuery, ["name","description","picture_path", "team_id", user.name, user.description, user.picture_path, userCount[0].id]);
 
-    availableTeams.sort(compare);
+      const insertedId = await new Promise((resolve) => {
+          connection.query(userQuery, (err, res) => {
+              if (err) return console.log(err);
 
-    // sort and pick least members
-}
+              console.log(res.insertId);
+              resolve(res.insertId);
+          });
+      });
+
+      const addAnswerQuery = 'INSERT INTO answers (??, ??, ??) VALUES (?, ?, ?)';
+
+      answers.forEach(element => {
+          console.log('chuj jebać: ', insertedId)
+          const answerQuery = mysql.format(addAnswerQuery, ["user_id", "question_id", "answer", insertedId, element.id, element.answer]);
+
+          connection.query(answerQuery, (err, res) => {
+              if (err) return console.log(err);
+  
+              console.log(res.insertId);
+          });
+      });
+  });
+
+  // sort and pick least members
+
+};
 
 module.exports = router;

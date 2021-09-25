@@ -69,22 +69,74 @@ function fyShuffle(a) {
   }
 
 
+  function compare( a, b ) {
+    if ( a.user_count < b.user_count ){
+      return -1;
+    }
+    if ( a.user_count > b.user_count ){
+      return 1;
+    }
+    return 0;
+  }
 
-  async function addUser() {
+
+// Test implementation of inserting an user and his answers - works with data structure defined at the bottom.
+
+  async function addUser(data) {
     
+    const user = data.user;
+    const answers = data.answers;
+
     // check available teams
 
-    const availableTeams = [];
-
-    let teamQuery = 'SELECT team_id, COUNT(*) AS userCount FROM users GROUP BY team_id';
-    connection.query(teamQuery, (err, response) => {
+    const teamQuery = 'SELECT id, user_count from teams LEFT JOIN (SELECT team_id, COUNT(*) AS user_count FROM users GROUP BY team_id) team_counts ON teams.id = team_counts.team_id;';
+    
+    connection.query(teamQuery, async (err, response) => {
         if(err) return console.log(err);
+        
+        let userCount = response;
+        userCount.sort((a,b) => a.user_count - b.user_count );
 
         console.log(response);
+
+        const addUserQuery = 'INSERT INTO users (??, ??, ??, ??) value (?, ?, ?, ?)';
+        const userQuery = mysql.format(addUserQuery, ["name","description","picture_path", "team_id", user.name, user.description, user.picture_path, userCount[0].id]);
+
+        const insertedId = await new Promise((resolve) => {
+            connection.query(userQuery, (err, res) => {
+                if (err) return console.log(err);
+
+                console.log(res.insertId);
+                resolve(res.insertId);
+            });
+        });
+
+        const addAnswerQuery = 'INSERT INTO answers (??, ??, ??) VALUES (?, ?, ?)';
+
+        answers.forEach(element => {
+            console.log('chuj jebać: ', insertedId)
+            const answerQuery = mysql.format(addAnswerQuery, ["user_id", "question_id", "answer", insertedId, element.id, element.answer]);
+
+            connection.query(answerQuery, (err, res) => {
+                if (err) return console.log(err);
+    
+                console.log(res.insertId);
+            });
+        });
     });
 
     // sort and pick least members
+
 };
 
-addUser();
+let data = {
+    answers: [{id: 1, answer: 'Nie wiem'}, {id: 2, answer: 'Andrzej kolejny odpowiada'}],
+    user: {
+        name: 'Król Andrzej Sobieski',
+        description: 'Jestem Andrzej, ale czwarty.',
+        picture_path: 'costam/tam/czwartyAndrzej.png'
+    }
+};
+
+addUser(data);
 
