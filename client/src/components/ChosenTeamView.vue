@@ -63,7 +63,6 @@ export default defineComponent({
 
   .h2 {
     font-size: 25px;
-    margin: 60px 15px;
     text-align: center;
     color: #fff;
   }
@@ -74,6 +73,7 @@ export default defineComponent({
   }
 
   .image-box {
+    margin: 40px;
     border: thin solid #0eff6e;
     border-radius: 50%;
   }

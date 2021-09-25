@@ -16,7 +16,7 @@ if (basePath) app.set('base', basePath);
 
 app.use(logger('dev'));
 app.use(cors({
-  origin: '*',
+  origin: process.env.IS_PROD ? 'https://eden.mvu.pl' : '*',
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

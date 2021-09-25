@@ -27,11 +27,13 @@ export default defineComponent({
     display: flex;
     align-items: center;
     flex-direction: column;
-    margin: 0 5vw;
+    margin: 0 5%;
+    width: 90%;
   }
 
   .h1 {
-    font-size: 6.5rem;
+    margin-left: -0.1em;
+    font-size: 6rem;
     letter-spacing: -.8rem;
     font-family: 'Libre Caslon Text', serif;
   }

@@ -9,9 +9,9 @@ const router = express.Router();
 
 const imageStorage = multer.diskStorage({
   // Destination to store image     
-  destination: __dirname + '/public/images', 
+  destination: process.env.IS_PROD ? path.resolve(__dirname, '..', '..', 'public_html', 'eden', 'faceden-img') : path.resolve(__dirname, 'public', 'images'),
     filename: (req, file, cb) => {
-        cb(null, file.fieldname + '_' + Date.now() 
+        cb(null, file.fieldname + '_' + Date.now() + '_' + Math.round(Math.random() * 100)
            + path.extname(file.originalname))
           // file.fieldname is name of the field (image)
           // path.extname get the uploaded file extension
@@ -33,25 +33,28 @@ const imageUpload = multer({
 }); 
 
 router.post('/photo', imageUpload.single('image'), async (req, res) => {
-    console.log('file path: ' + req.file.path);
-    return res.send(req.file.path);
+  console.log('file path: ' + req.file.path);
+  const { path } = req.file;
+  const needle = '/faceden-img/';
+  const publicPath = path.substring(path.indexOf(needle) + needle.length)
+  return res.send(publicPath);
 });
 
 
 router.post('/register', async (req, res) => {
-        if (!req) res.status(403).send('Błędne dane.');
-        const connection = await establishConnection()
-            .catch(() => undefined);
-        
-        if (!connection) return res.sendStatus(500);
+  if (!req) res.status(403).send('Błędne dane.');
+  const connection = await establishConnection()
+      .catch(() => undefined);
+  
+  if (!connection) return res.sendStatus(500);
 
-        const teamData = await addUser(req.body, connection);
+  const teamData = await addUser(req.body, connection);
 
-        res.status(200)
-            .send({id: teamData[0], team: teamData[1]});
+  res.status(200)
+      .send({id: teamData[0], name: teamData[1]});
 
-        
-        connection.end();
+  
+  connection.end();
 });
 
 function compare( a, b ) {
