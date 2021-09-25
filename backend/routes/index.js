@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 const { establishConnection } = require('../utils/connection');
+const fs = require('fs');
 
 const router = express.Router();
 
@@ -21,6 +22,31 @@ router.route('/form')
             .send('success');
 });
 
+router.route('/photo')
+  .post(async function (req, res) { 
+    if (!req) res.status(403).send('Błędne dane.');
+    const connection = await establishConnection()
+      .catch(() => undefined);
+
+    if (!connection) return res.sendStatus(500);
+
+    imageData = req.image;
+    imageName = Math.random().toString(36).substr(2) + '.jpg';
+    let path = __dirname +'/public/images/' + imageName;
+
+    while(fs.existsSync(path)) {
+      imageName = Math.random().toString(36).substr(2);
+      path = __dirname + 'public/images/' + imageName;
+    }
+
+    fs.writeFile(path, imageName, function(err) {
+      if(err) {
+          return console.log(err);
+      }
+      console.log("The file was saved!");
+    }); 
+
+});
 
 function compare( a, b ) {
   if ( a.user_count < b.user_count ){

@@ -1,4 +1,6 @@
 let mysql = require('mysql');
+const fs = require('fs');
+
 let connection = mysql.createConnection({
   host: 's148.cyber-folks.pl',
   user: 'goethe_eden-faceden',
@@ -148,5 +150,25 @@ let data = {
     }
 };
 
-addUser(data);
+// addUser(data);
 
+
+function zapis() {
+    imageData = 'chujcipa';
+    imageName = Math.random().toString(36).substr(2) + '.jpg';
+    let path = __dirname + '\\public\\images\\' + imageName;
+
+    while(fs.existsSync(path)) {
+      imageName = Math.random().toString(36).substr(2);
+      path = 'public/images/' + imageName;
+    }
+
+    fs.writeFile(path, imageName, function(err) {
+      if(err) {
+          return console.log(err);
+      }
+      console.log("The file was saved!");
+    }); 
+}
+
+zapis();
