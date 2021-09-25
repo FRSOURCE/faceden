@@ -1,3 +1,7 @@
+<template>
+  <ViewSwitch :class="$style['main-content']" />
+</template>
+
 <script lang="ts">
 import { defineComponent } from 'vue'
 import ViewSwitch from '@/components/ViewSwitch.vue'
@@ -53,5 +57,21 @@ body {
   background-color: #000;
   font-family: 'Inter', sans-serif;
   color: #0eff6e;
+}
+
+small {
+  font-size: 0.5em;
+}
+
+button:disabled {
+  opacity: 0.8;
+  pointer-events: none;
+}
+</style>
+
+<style lang="scss" module>
+.main-content {
+  max-width: 600px;
+  margin: 0 auto;;
 }
 </style>

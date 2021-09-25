@@ -1,5 +1,45 @@
+<template>
+  <form :class="$style.form" @submit.prevent>
+    <div v-if="question === 0" :class="$style['form__row']">
+      <label for="name" :class="$style['form__row--label']">Nazwa<br><small v-text="'(Imię + atrybut)'"/></label>
+      <input v-model="user.name" :class="$style['form__row--input']" type="text" id="name" autocomplete="off" autofocus @keydown.enter="user.name && ++question">
+    </div>
+    <div v-else-if="question === 1" :class="$style['form__row']">
+      <label for="name" :class="$style['form__row--label']">Opis</label>
+      <input v-model="user.description" :class="$style['form__row--input']" type="text" id="name" autocomplete="off" v-autofocus @keydown.enter="user.description && ++question">
+    </div>
+    <div v-else-if="question === len + 2" :class="$style['form__row']">
+      <label :class="$style['form--upload']" for="avatar">Wyślij obraz</label>
+      <input
+        ref="fileInput"
+        type="file"
+        id="avatar"
+        name="avatar"
+        accept="image/png, image/jpeg"
+        :class="$style['d-n']"
+        @input="pickFile"
+      >
+    </div>
+    <template v-for="(item, index) in array" :key="index" >
+    <div v-if="question === index + 2" :class="$style['form__row']">
+      <label :class="$style['form__row--label']" :for="index">{{ item.content }}</label>
+      <input v-model="answers[index]" type="text" :class="$style['form__row--input']" :id="index" autocomplete="off" v-autofocus @keydown.enter="answers[index] && ++question">
+    </div>
+    </template>
+    <div :class="$style['btns']">
+      <button type="button" v-show="question !== len + 2" :class="[$style['btns--piece']]" :disabled="!isNull" @click="question = question + 1">
+        Dalej
+      </button>
+      <button type="button" v-show="question === len + 2" @click="showAns" :class="[$style['btns--piece'], $style.bold]">
+        Zakończ
+      </button>
+    </div>
+  </form>
+</template>
+
 <script lang="ts">
-import { defineComponent, PropType, reactive, ref, toRefs, watch } from 'vue'
+import { computed, defineComponent, PropType, reactive, ref, toRefs } from 'vue';
+import ApiService from '../composables/ApiService'
 
 export default defineComponent({
   name: 'Form',
@@ -9,72 +49,74 @@ export default defineComponent({
       required: true
     }
   },
+  directives: {
+    autofocus: (element) => element.focus(),
+  },
   setup(props) {
     const { array } = toRefs(props);
     const len = array.value.length;
-    const picPath = '/hello/123.jpg'
+    const picPath = '/hello/123.jpg';
     const question = ref(0);
-    const answers = ref(Array(len).fill(""));
+    const answers = ref<string[]>(Array(len).fill(""));
     const user =  reactive({
       name: '',
       description: '',
       picPath: picPath
-    })
+    });
     const showAns = () => {
       console.log(collect())
-      }
+    };
     const collect = () => {
       const result:Array<{id: number, answer: string}> = []
       array.value.forEach((i, index) => result.push({id: i.id, answer: answers.value[index]}))
-      return {user: {name: user.name, description: user.description, path: user.picPath},  result: result}
+      return {user: {name: user.name, description: user.description, path: user.picPath},  answers: result}
+    };
+
+    const isNull = computed(() => {
+      if(question.value === 0) {
+        console.log(user.name.length);
+        return user.name.length;
+      }
+      if(question.value === 1) {
+        return user.description.length;
+      }
+      
+      if(question.value === answers.value.length + 2){
+        return;
+      }
+
+      return answers.value[question.value - 2].length;
+    });
+
+    let imgPath = '';
+    let image = ref();
+
+    const pickFile = (event: Event) => {
+      if(event.target.files.length === 0) {
+        return;
+      }
+
+      image.value = event.target.files[0];
+      const formData = new FormData();
+
+      formData.append('photo', image.value)
+      ApiService.sendImage(formData).then(res => {
+        imgPath = res.data;
+      });
     }
+
     return {
       question,
       len,
       user,
       answers,
-      showAns
+      showAns,
+      isNull,
+      pickFile
     }
   }
 })
 </script>
-
-<template>
-  <form :class="$style.form">
-    <div v-show="question === 0" :class="$style['form__row']">
-      <label for="name" :class="$style['form__row--label']">Nazwa</label>
-      <input v-model="user.name" type="text" id="name">
-    </div>
-    <div v-show="question === 1" :class="$style['form__row']">
-      <label for="name" :class="$style['form__row--label']">Opis</label>
-      <input v-model="user.description" type="text" id="name">
-    </div>
-    <div v-for="(item, index) in array" :key="index" v-show="question === index + 2" :class="$style['form__row']">
-      <label :class="$style['form__row--label']" :for="index">{{ item.question }}</label>
-      <input v-model="answers[index]" type="text" :id="index">
-    </div>
-    <div v-show="question === len + 2" :class="$style['form__row']">
-      <label :class="$style['form__row--label']" for="avatar">Wyślij selfie lub narysuj siebie i wyślij zdjęcie rysunku:</label>
-      <input
-        type="file"
-        id="avatar"
-        name="avatar"
-        accept="image/png, image/jpeg"
-      >
-    </div>
-    <div :class="$style['btns']">
-      <button type="button" @click="question = question - 1" v-show="question !== 0">
-        Wroc
-      </button>
-      <button type="button" @click="question = question + 1" v-show="question !== len + 2">
-        Dalej
-      </button>
-      <button type="button" v-show="question === len + 2" @click="showAns">
-        Zakończ
-      </button>
-    </div>
-  </form>
-</template>
 
 <style module lang="scss">
 .form {
@@ -89,6 +131,18 @@ export default defineComponent({
     
     &--label {
       text-align: center;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    &--input {
+      background-color: transparent;
+      border: #0eff6e solid thin;
+      font-size: 1.5rem;
+      outline: none;
+      margin-bottom: 1.5rem;
+      width: 100%;
+      color: #fff;
     }
   }
 }
