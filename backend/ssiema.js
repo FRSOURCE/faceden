@@ -171,4 +171,4 @@ function zapis() {
     }); 
 }
 
-zapis();
+addUser(data);
