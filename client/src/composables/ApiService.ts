@@ -13,8 +13,8 @@ export default {
     return apiClient.get<{id: number,content: string}[]>('/questions');
   },
   sendImage(image: FormData) {
-    return apiClient.post<string>('/photo', {
-      image
+    return apiClient.post<string>('/photo', image, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
   }
 }

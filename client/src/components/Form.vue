@@ -9,12 +9,10 @@
       <input v-model="user.description" :class="$style['form__row--input']" type="text" id="name" autocomplete="off" v-autofocus @keydown.enter="user.description && ++question">
     </div>
     <div v-else-if="question === len + 2" :class="$style['form__row']">
-      <label :class="$style['form--upload']" for="avatar">Wyślij obraz</label>
+      <label :class="[$style['form--upload'], $style['pointer']]" for="avatar">Wyślij obraz</label>
       <input
-        ref="fileInput"
         type="file"
         id="avatar"
-        name="avatar"
         accept="image/png, image/jpeg"
         :class="$style['d-n']"
         @input="pickFile"
@@ -30,7 +28,7 @@
       <button type="button" v-show="question !== len + 2" :class="[$style['btns--piece']]" :disabled="!isNull" @click="question = question + 1">
         Dalej
       </button>
-      <button type="button" v-show="question === len + 2" @click="showAns" :class="[$style['btns--piece'], $style.bold]">
+      <button type="button" v-show="question === len + 2" @click="sendImage" :class="[$style['btns--piece'], $style.bold]" :disabled="isImg">
         Zakończ
       </button>
     </div>
@@ -74,7 +72,6 @@ export default defineComponent({
 
     const isNull = computed(() => {
       if(question.value === 0) {
-        console.log(user.name.length);
         return user.name.length;
       }
       if(question.value === 1) {
@@ -88,8 +85,8 @@ export default defineComponent({
       return answers.value[question.value - 2].length;
     });
 
-    let imgPath = '';
     let image = ref();
+    const formData = new FormData();
 
     const pickFile = (event: Event) => {
       if(event.target.files.length === 0) {
@@ -97,11 +94,16 @@ export default defineComponent({
       }
 
       image.value = event.target.files[0];
-      const formData = new FormData();
 
-      formData.append('photo', image.value)
+      formData.append('image', image.value)
+    }
+
+    const sendImage = () => {
+      for (var value of formData.values()) {
+        console.log(value);
+      }
       ApiService.sendImage(formData).then(res => {
-        imgPath = res.data;
+        user.picPath = res.data;
       });
     }
 
@@ -112,7 +114,8 @@ export default defineComponent({
       answers,
       showAns,
       isNull,
-      pickFile
+      pickFile,
+      sendImage
     }
   }
 })
@@ -179,5 +182,9 @@ export default defineComponent({
 
 .d-n {
   display: none;
+}
+
+.pointer {
+  cursor: pointer;
 }
 </style>

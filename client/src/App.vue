@@ -41,6 +41,10 @@ small {
   font-size: 0.5em;
 }
 
+button {
+  cursor: pointer;
+}
+
 button:disabled {
   opacity: 0.8;
   pointer-events: none;
