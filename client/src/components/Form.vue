@@ -35,7 +35,6 @@
         id="avatar"
         accept="image/png, image/jpeg"
         :class="$style['d-n']"
-        capture="user"
         @input="pickFile"
       >
       <img :src="previewImage" :class="$style['imagePreviewWrapper']" />
@@ -128,11 +127,12 @@ export default defineComponent({
 
       image.value = event.target.files[0];
 
-      formData.append('image', image.value)
+      if (formData.has('image')) formData.delete('image');
+
+      formData.append('image', image.value);
 
       if (image.value) {
         previewImage.value = URL.createObjectURL(image.value);
-
       }
     }
 
