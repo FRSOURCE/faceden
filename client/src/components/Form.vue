@@ -35,9 +35,10 @@
         id="avatar"
         accept="image/png, image/jpeg"
         :class="$style['d-n']"
+        capture="user"
         @input="pickFile"
       >
-      <div :class="$style['imagePreviewWrapper']" :style="{ 'background-image': `url(${previewImage})` }" />
+      <img :src="previewImage" :class="$style['imagePreviewWrapper']" />
     </div>
     <template v-for="(item, index) in array">
     <div v-if="question === index + 2" :class="$style['form__row']" :key="index">
@@ -128,11 +129,8 @@ export default defineComponent({
       formData.append('image', image.value)
 
       if (image.value) {
-        let reader = new FileReader();
-        reader.onload = e => {
-          previewImage.value = e.target.result
-        }
-        reader.readAsDataURL(image.value)
+        previewImage.value = URL.createObjectURL(image.value);
+
       }
     }
 
@@ -220,12 +218,12 @@ export default defineComponent({
 
 .imagePreviewWrapper {
   background-repeat: no-repeat;
-    width: 250px;
-    height: 250px;
-    display: block;
-    cursor: pointer;
-    margin: 0 auto 30px;
-    background-size: contain;
-    background-position: center center;
+  max-height: 50vh;
+  max-width: 90%;
+  display: block;
+  cursor: pointer;
+  margin: 0 auto 30px;
+  background-size: contain;
+  background-position: center center;
 }
 </style>
