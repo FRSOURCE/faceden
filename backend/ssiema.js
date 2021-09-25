@@ -137,6 +137,7 @@ async function addUser(data) {
                 });
             });
         });
+        console.log(teamData);
         resolve(teamData);
     });  
 };
@@ -144,7 +145,7 @@ async function addUser(data) {
 let data = {
     answers: [{id: 1, answer: 'Nie wiem'}, {id: 2, answer: 'Andrzej kolejny odpowiada'}],
     user: {
-        name: 'Andrz.',
+        name: 'Andrz.FFFF',
         description: 'Jestem Andrzej.',
         picture_path: 'costam/tam/czwartyAndrzej.png'
     }
@@ -171,4 +172,6 @@ function zapis() {
     }); 
 }
 
-addUser(data);
+//addUser(data);
+
+zapis();
