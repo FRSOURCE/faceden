@@ -29,20 +29,21 @@ export default defineComponent({
   }
 
   .h1 {
-    font-size: 48px;
+    font-size: 60px;
     margin: 60px;
+    font-family: 'Libre Caslon Text', serif;
   }
 
   .text {
-    padding: 30px;
+    padding: 15px 30px;
     line-height: 1.5rem;
     text-align: center;
     color: #fff;
   }
 
   .button-run-form {
-    padding: 20px;
-    font-size: 24px;
+    padding: 30px;
+    font-size: 32px;
     border: thin solid #000;
     cursor: pointer;
     color: #fff;
