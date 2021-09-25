@@ -10,14 +10,14 @@
 
 <script lang="ts">
 import { defineComponent, ref, Ref } from 'vue'
-import Unicorn from '@/assets/images/1.svg'
-import Ghost from '@/assets/images/2.svg'
-import Dragon from '@/assets/images/3.svg'
-import Narhval from '@/assets/images/4.svg'
-import Mushroom from '@/assets/images/5.svg'
-import Octopus from '@/assets/images/6.svg'
-import Pigeon from '@/assets/images/7.svg'
-import Turtle from '@/assets/images/8.svg'
+import Unicorn from '@/assets/images/1.svg?component'
+import Ghost from '@/assets/images/2.svg?component'
+import Dragon from '@/assets/images/3.svg?component'
+import Narhval from '@/assets/images/4.svg?component'
+import Mushroom from '@/assets/images/5.svg?component'
+import Octopus from '@/assets/images/6.svg?component'
+import Pigeon from '@/assets/images/7.svg?component'
+import Turtle from '@/assets/images/8.svg?component'
 
 export default defineComponent({
   name: 'ChosenTeamView',
@@ -33,7 +33,7 @@ export default defineComponent({
   },
   setup() {
     const localStorageTeam: string | null = localStorage.getItem('registerTeam')
-    const drawedTeam: Ref<{id: number, name: string} | {}> = ref({})
+    const drawedTeam: Ref<{id?: number, name?: string}> = ref({})
     const images = ['Unicorn', 'Ghost', 'Dragon', 'Narhval', 'Mushroom', 'Octopus', 'Pigeon', 'Turtle']
 
     if (localStorageTeam) {
@@ -41,7 +41,7 @@ export default defineComponent({
     }
 
     const svgName = ref('Unicorn')
-    if (drawedTeam.value) {
+    if (drawedTeam.value?.id !== void 0) {
       svgName.value = images[drawedTeam.value.id - 1]
     }
 
