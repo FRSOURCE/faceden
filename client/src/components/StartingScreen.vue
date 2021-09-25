@@ -1,8 +1,10 @@
 <template>
   <div :class="$style.container">
-    <h1 :class="$style.h1">Faceden</h1>
-    <p :class="$style.text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tincidunt elit at turpis lacinia, ac sodales magna rutrum. Fusce mollis maximus nisl vitae pharetra. Nulla nec tincidunt nisi. Sed et orci diam. Aenean efficitur justo neque, commodo convallis magna auctor sit amet. Nunc molestie consequat nisl, ut tristique purus iaculis et. Aliquam ornare justo a lectus porta, nec ultrices neque pellentesque. Phasellus vel erat egestas, egestas augue vitae, aliquam erat.</p>
-    <button type="button" :class="$style['button-run-form']" @click="navigateTo('Form')">Zaczynamy!</button>
+    <h1 :class="$style.h1">faceden</h1>
+    <p :class="$style.text">
+      Weź udział we wspólnym tkaniu edenowej grzybni! Odpowiedz na kilka prostych pytań, które pozwolą nam ją uformować. W swojej cyfrowej postaci, grzybnia stanie się pamiątką z naszego wyjazdu.
+    </p>
+    <button type="button" @click="navigateTo('Form')">Zaczynamy</button>
   </div>
 </template>
 
@@ -29,30 +31,15 @@ export default defineComponent({
   }
 
   .h1 {
-    font-size: 60px;
-    margin: 60px;
+    font-size: 6.5rem;
+    letter-spacing: -.8rem;
     font-family: 'Libre Caslon Text', serif;
   }
 
   .text {
+    margin-top: 2rem;
     padding: 15px 30px;
-    line-height: 1.5rem;
     text-align: center;
     color: #fff;
-  }
-
-  .button-run-form {
-    padding: 15px;
-    margin: 15px;
-    font-size: 32px;
-    border: thin solid #000;
-    cursor: pointer;
-    color: #fff;
-    background-color: #000;
-
-    &:hover {
-      color: #000;
-      background-color: #0eff6e;
-    }
   }
 </style>

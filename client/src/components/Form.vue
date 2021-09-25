@@ -1,12 +1,32 @@
 <template>
   <form :class="$style.form" @submit.prevent>
     <div v-if="question === 0" :class="$style['form__row']">
-      <label for="name" :class="$style['form__row--label']">Nazwa<br><small v-text="'(Imię + atrybut)'"/></label>
-      <input v-model="user.name" :class="$style['form__row--input']" type="text" id="name" autocomplete="off" autofocus @keydown.enter="user.name && ++question">
+      <label for="name" :class="$style['form__row--label']">Twoja nazwa<br><small v-text="'np. imię + atrybut/pseudonim'"/></label>
+      <input
+        v-model="user.name"
+        :class="$style['form__row--input']"
+        type="text"
+        id="name"
+        autocomplete="off"
+        spellcheck="false"
+        autocorrect="off"
+        autofocus
+      >
     </div>
     <div v-else-if="question === 1" :class="$style['form__row']">
-      <label for="name" :class="$style['form__row--label']">Opis</label>
-      <input v-model="user.description" :class="$style['form__row--input']" type="text" id="name" autocomplete="off" v-autofocus @keydown.enter="user.description && ++question">
+      <label for="name" :class="$style['form__row--label']">Opis<br><small>napisz coś o sobie</small></label>
+      <textarea
+        rows="5"
+        maxlength="400"
+        v-model="user.description"
+        :class="$style['form__row--input']"
+        id="name"
+        autocomplete="off"
+        spellcheck="false"
+        autocorrect="off"
+        v-autofocus
+      />
+      <div :class="$style['textarea-info']">pozostało {{ 400 - user.description.length }} znaków</div>
     </div>
     <div v-else-if="question === len + 2" :class="$style['form__row']">
       <label :class="[$style['form--upload'], $style['pointer']]" for="avatar">Wyślij obraz</label>
@@ -22,14 +42,26 @@
     <template v-for="(item, index) in array">
     <div v-if="question === index + 2" :class="$style['form__row']" :key="index">
       <label :class="$style['form__row--label']" :for="index.toString()">{{ item.content }}</label>
-      <input v-model="answers[index]" type="text" :class="$style['form__row--input']" :id="index.toString()" autocomplete="off" v-autofocus @keydown.enter="answers[index] && ++question">
+
+      <textarea
+        rows="3"
+        maxlength="400"
+        v-model="answers[index]"
+        :class="$style['form__row--input']"
+        :id="index.toString()"
+        autocomplete="off"
+        spellcheck="false"
+        autocorrect="off"
+        v-autofocus
+      />
+      <div :class="$style['textarea-info']">pozostało {{ 400 - answers[index].length }} znaków</div>
     </div>
     </template>
     <div :class="$style['btns']">
-      <button type="button" v-show="question !== len + 2" :class="[$style['btns--piece']]" :disabled="!isNull" @click="question = question + 1">
+      <button type="button" v-if="question !== len + 2" :disabled="!isNull" @click="question = question + 1">
         Dalej
       </button>
-      <button type="button" v-show="question === len + 2" @click="sendImage" :class="[$style['btns--piece'], $style.bold]" :disabled="!isImg">
+      <button type="button" v-else @click="sendImage" :disabled="!isImg">
         Zakończ
       </button>
     </div>
@@ -61,9 +93,6 @@ export default defineComponent({
       description: '',
       picPath: ''
     });
-    const showAns = () => {
-      console.log(collect())
-    };
     const collect = () => {
       const result:Array<{id: number, answer: string}> = []
       array.value.forEach((i, index) => result.push({id: i.id, answer: answers.value[index]}))
@@ -122,7 +151,6 @@ export default defineComponent({
       len,
       user,
       answers,
-      showAns,
       isNull,
       pickFile,
       sendImage,
@@ -137,8 +165,7 @@ export default defineComponent({
 .form {
   display: flex;
   flex-flow: column;
-  padding: 0 10vw;
-  margin-top: 60px;
+  padding: 0 20px;
 
   &--upload {
     padding: 1rem;
@@ -163,9 +190,11 @@ export default defineComponent({
       border: #0eff6e solid thin;
       font-size: 1.5rem;
       outline: none;
+      margin-top: 1rem;
       margin-bottom: 1.5rem;
       width: 100%;
       color: #fff;
+      resize: none;
     }
   }
 }
@@ -173,27 +202,16 @@ export default defineComponent({
 .btns {
   display: flex;
   justify-content: center;
-
-  &--piece {
-    background-color: transparent;
-    padding: 0.75rem;
-    margin: 0 1rem;
-    border: none;
-    color: #0eff6e;
-
-    &:hover {
-      background-color: #0eff6e;
-      color: black;
-    }
-  }
 }
 
-.bold {
-  font-weight: 700;
-}
 
 .d-n {
   display: none;
+}
+
+.textarea-info {
+  width: 100%;
+  text-align: right;
 }
 
 .pointer {
