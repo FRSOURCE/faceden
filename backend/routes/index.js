@@ -19,7 +19,7 @@ router.route('/form')
 
         res.status(200)
             .send('success');
-    });
+});
 
 
 function compare( a, b ) {

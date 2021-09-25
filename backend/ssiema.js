@@ -82,58 +82,68 @@ function fyShuffle(a) {
 
 // Test implementation of inserting an user and his answers - works with data structure defined at the bottom.
 
-  async function addUser(data) {
-    
-    const user = data.user;
-    const answers = data.answers;
+async function addUser(data) {
+    return new Promise((resolve) => {  
+        const user = data.user;
+        const answers = data.answers;
+        let teamData;
+        // check available teams
 
-    // check available teams
-
-    const teamQuery = 'SELECT id, user_count from teams LEFT JOIN (SELECT team_id, COUNT(*) AS user_count FROM users GROUP BY team_id) team_counts ON teams.id = team_counts.team_id;';
-    
-    connection.query(teamQuery, async (err, response) => {
-        if(err) return console.log(err);
+        const teamQuery = 'SELECT id, user_count from teams LEFT JOIN (SELECT team_id, COUNT(*) AS user_count FROM users GROUP BY team_id) team_counts ON teams.id = team_counts.team_id;';
         
-        let userCount = response;
-        userCount.sort((a,b) => a.user_count - b.user_count );
+        connection.query(teamQuery, async (err, response) => {
+            if(err) return console.log(err);
+            
+            let userCount = response;
+            userCount.sort((a,b) => a.user_count - b.user_count );
 
-        console.log(response);
+            console.log(response);
 
-        const addUserQuery = 'INSERT INTO users (??, ??, ??, ??) value (?, ?, ?, ?)';
-        const userQuery = mysql.format(addUserQuery, ["name","description","picture_path", "team_id", user.name, user.description, user.picture_path, userCount[0].id]);
+            const addUserQuery = 'INSERT INTO users (??, ??, ??, ??) value (?, ?, ?, ?)';
+            const userQuery = mysql.format(addUserQuery, ["name","description","picture_path", "team_id", user.name, user.description, user.picture_path, userCount[0].id]);
 
-        const insertedId = await new Promise((resolve) => {
-            connection.query(userQuery, (err, res) => {
-                if (err) return console.log(err);
+            const selectTeamQuery = 'SELECT id, name FROM teams WHERE id = ?';
+            const teamQuery = mysql.format(selectTeamQuery, [userCount[0].id]);
 
-                console.log(res.insertId);
-                resolve(res.insertId);
+            teamData = await new Promise ((resolve) => {
+                    connection.query(teamQuery, (err, res) =>{
+                    if (err) return console.log(err);
+                    const teamTable = [];
+                    teamTable.push(res[0].id);
+                    teamTable.push(res[0].name);
+                    console.log("druzyna: ", teamTable)
+                    resolve(teamTable);
+                });
+            });
+
+            const insertedId = await new Promise((resolve) => {
+                connection.query(userQuery, (err, res) => {
+                    if (err) return console.log(err);
+
+                    console.log(res.insertId);
+                    resolve(res.insertId);
+                });
+            });
+
+            const addAnswerQuery = 'INSERT INTO answers (??, ??, ??) VALUES (?, ?, ?)';
+
+            answers.forEach(element => {
+                const answerQuery = mysql.format(addAnswerQuery, ["user_id", "question_id", "answer", insertedId, element.id, element.answer]);
+
+                connection.query(answerQuery, (err, res) => {
+                    if (err) return console.log(err);
+                });
             });
         });
-
-        const addAnswerQuery = 'INSERT INTO answers (??, ??, ??) VALUES (?, ?, ?)';
-
-        answers.forEach(element => {
-            console.log('chuj jebać: ', insertedId)
-            const answerQuery = mysql.format(addAnswerQuery, ["user_id", "question_id", "answer", insertedId, element.id, element.answer]);
-
-            connection.query(answerQuery, (err, res) => {
-                if (err) return console.log(err);
-    
-                console.log(res.insertId);
-            });
-        });
-    });
-
-    // sort and pick least members
-
+        resolve(teamData);
+    });  
 };
 
 let data = {
     answers: [{id: 1, answer: 'Nie wiem'}, {id: 2, answer: 'Andrzej kolejny odpowiada'}],
     user: {
-        name: 'Król Andrzej Sobieski',
-        description: 'Jestem Andrzej, ale czwarty.',
+        name: 'Andrz.',
+        description: 'Jestem Andrzej.',
         picture_path: 'costam/tam/czwartyAndrzej.png'
     }
 };
