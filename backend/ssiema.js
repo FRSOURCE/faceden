@@ -68,4 +68,23 @@ function fyShuffle(a) {
     }
   }
 
-getQuestions();
+
+
+  async function addUser() {
+    
+    // check available teams
+
+    const availableTeams = [];
+
+    let teamQuery = 'SELECT team_id, COUNT(*) AS userCount FROM users GROUP BY team_id';
+    connection.query(teamQuery, (err, response) => {
+        if(err) return console.log(err);
+
+        console.log(response);
+    });
+
+    // sort and pick least members
+};
+
+addUser();
+
