@@ -50,8 +50,8 @@ export default defineComponent({
       <input v-model="user.description" type="text" id="name">
     </div>
     <div v-for="(item, index) in array" :key="index" v-show="question === index + 2" :class="$style['form__row']">
-      <label :class="$style['form__row--label']" :for="index">{{ item.question }}</label>
-      <input v-model="answers[index]" type="text" :id="index">
+      <label :class="$style['form__row--label']" :for="index.toString()">{{ item.question }}</label>
+      <input v-model="answers[index]" type="text" :id="index.toString()">
     </div>
     <div v-show="question === len + 2" :class="$style['form__row']">
       <label :class="$style['form__row--label']" for="avatar">Wyślij selfie lub narysuj siebie i wyślij zdjęcie rysunku:</label>
