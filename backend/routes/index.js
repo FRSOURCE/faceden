@@ -33,7 +33,6 @@ const imageUpload = multer({
 }); 
 
 router.post('/photo', imageUpload.single('image'), async (req, res) => {
-  console.log('file path: ' + req.file.path);
   const { path } = req.file;
   const needle = '/faceden-img/';
   const publicPath = path.substring(path.indexOf(needle) + needle.length)
@@ -48,7 +47,7 @@ router.post('/register', async (req, res) => {
   
   if (!connection) return res.sendStatus(500);
 
-  const teamData = await addUser(req.body, connection);
+  const teamData = await addUser(req.body, connection, res);
 
   res.status(200)
       .send({id: teamData[0], name: teamData[1]});
@@ -70,14 +69,12 @@ function compare( a, b ) {
 function addAnswer(data, userId) {
     let insertQuery = 'INSERT INTO ?? (??,??,??) VALUES (?,?,?)';
     let query = mysql.format(insertQuery,["answers","user_id","question_id","answer",userId,data.questionId, data.answer]);
-    connection.query(query,(err, response) => {
-        if(err) return console.log(err);
-        // rows added
-        console.log(response.insertId);
+    connection.query(query,(err) => {
+      if (err) return res.status(500).send(err);
     });
 }
 
-async function addUser(data, connection) {
+async function addUser(data, connection, expressRes) {
   return new Promise((resolve) => {  
       const user = data.user;
       const answers = data.answers;
@@ -88,7 +85,7 @@ async function addUser(data, connection) {
       const teamQuery = 'SELECT id, user_count from teams LEFT JOIN (SELECT team_id, COUNT(*) AS user_count FROM users GROUP BY team_id) team_counts ON teams.id = team_counts.team_id;';
       
       connection.query(teamQuery, async (err, response) => {
-          if(err) return console.log(err);
+          if (err) return expressRes.status(500).send(err);
           
           let userCount = response;
           userCount.sort((a,b) => a.user_count - b.user_count );
@@ -103,7 +100,7 @@ async function addUser(data, connection) {
 
           teamData = await new Promise ((resolve) => {
               connection.query(teamQuery, (err, res) =>{
-                  if (err) return console.log(err);
+                  if (err) return expressRes.status(500).send(err);
                   const teamTable = [];
                   teamTable.push(res[0].id);
                   teamTable.push(res[0].name);
@@ -114,7 +111,7 @@ async function addUser(data, connection) {
 
           const insertedId = await new Promise((resolve) => {
               connection.query(userQuery, (err, res) => {
-                  if (err) return console.log(err);
+                  if (err) return expressRes.status(400).send({ message: 'Ta nazwa jest już zajęta' });
 
                   console.log(res.insertId);
                   resolve(res.insertId);
@@ -124,15 +121,14 @@ async function addUser(data, connection) {
           const addAnswerQuery = 'INSERT INTO answers (??, ??, ??) VALUES (?, ?, ?)';
 
           await Promise.all(answers.map(element => new Promise(resolve => {
-              const answerQuery = mysql.format(addAnswerQuery, ["user_id", "question_id", "answer", insertedId, element.id, element.answer]);
+            const answerQuery = mysql.format(addAnswerQuery, ["user_id", "question_id", "answer", insertedId, element.id, element.answer]);
 
-              connection.query(answerQuery, (err, res) => {
-                  if (err) return console.log(err);
-                  resolve();
-              });
+            connection.query(answerQuery, (err, res) => {
+              if (err) return expressRes.status(500).send(err);
+              resolve();
+            });
           })));
 
-          console.log(teamData);
           resolve(teamData);
       });
   });

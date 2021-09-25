@@ -38,6 +38,21 @@
         @input="pickFile"
       >
       <img :src="previewImage" :class="$style['imagePreviewWrapper']" />
+
+      <template v-if="errorMsg">
+        {{ errorMsg }}
+        <label for="name" :class="$style['form__row--label']">Wpisz nową nazwę<br><small v-text="'np. imię + atrybut/pseudonim'"/></label>
+        <input
+          v-model="user.name"
+          :class="$style['form__row--input']"
+          type="text"
+          id="name"
+          autocomplete="off"
+          spellcheck="false"
+          autocorrect="off"
+          autofocus
+        >
+      </template>
     </div>
     <template v-for="(item, index) in array">
     <div v-if="question === index + 2" :class="$style['form__row']" :key="index">
@@ -95,6 +110,7 @@ export default defineComponent({
       description: '',
       picPath: ''
     });
+    const errorMsg = ref('');
     const collect = () => {
       const result:Array<{id: number, answer: string}> = []
       array.value.forEach((i, index) => result.push({id: i.id, answer: answers.value[index]}))
@@ -138,12 +154,20 @@ export default defineComponent({
 
     const sendImage = () => {
       loading.value = true;
+      errorMsg.value = '';
       ApiService.sendImage(formData).then(res => {
         user.picPath = res.data;
         ApiService.register(collect()).then(res => {
           localStorage.setItem('registerTeam', JSON.stringify(res.data));
           emit('navTo', 'ChosenTeamView');
           loading.value = false;
+        })
+        .catch((err) => {
+          console.log('s');
+          loading.value = false;
+          if (err && typeof err === 'object' && err?.response?.data?.message && err.response.status === 400) {
+            errorMsg.value = err.response.data.message;
+          }
         });
       }).catch(()=> loading.value = false);
     }
@@ -153,6 +177,7 @@ export default defineComponent({
     })
 
     return {
+      errorMsg,
       loading,
       question,
       len,
