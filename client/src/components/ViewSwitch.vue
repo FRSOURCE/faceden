@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, Ref, ref } from 'vue'
 import StartingScreen from '@/components/StartingScreen.vue'
 import ChosenTeamView from '@/components/ChosenTeamView.vue'
 import Form from '@/components/Form.vue'
@@ -38,6 +38,17 @@ export default defineComponent({
       questions.value = res.data;
     })
     
+    const localStorageTeam: string | null = localStorage.getItem('registerTeam')
+    const drawedTeam: Ref<{id: number, name: string} | null> = ref(null)
+
+    if (localStorageTeam) {
+      drawedTeam.value = JSON.parse(localStorageTeam)
+    }
+
+    if (drawedTeam.value) {
+      navigate('ChosenTeamView')
+    }
+
     return {
       visibleScreen,
       Screen,

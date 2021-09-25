@@ -31,6 +31,7 @@ button {
 
 body {
   min-height: 100vh;
+  line-height: 1.2;
   background-color: #000;
   font-family: 'Inter', sans-serif;
   color: #0eff6e;
