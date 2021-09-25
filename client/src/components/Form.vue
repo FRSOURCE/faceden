@@ -20,10 +20,10 @@
         @input="pickFile"
       >
     </div>
-    <template v-for="(item, index) in array" :key="index" >
-    <div v-if="question === index + 2" :class="$style['form__row']">
-      <label :class="$style['form__row--label']" :for="index">{{ item.content }}</label>
-      <input v-model="answers[index]" type="text" :class="$style['form__row--input']" :id="index" autocomplete="off" v-autofocus @keydown.enter="answers[index] && ++question">
+    <template v-for="(item, index) in array">
+    <div v-if="question === index + 2" :class="$style['form__row']" :key="index">
+      <label :class="$style['form__row--label']" :for="index.toString()">{{ item.content }}</label>
+      <input v-model="answers[index]" type="text" :class="$style['form__row--input']" :id="index.toString()" autocomplete="off" v-autofocus @keydown.enter="answers[index] && ++question">
     </div>
     </template>
     <div :class="$style['btns']">
@@ -45,7 +45,7 @@ export default defineComponent({
   name: 'Form',
   props: {
     array: {
-      type: Array as PropType<{ id: number; question: string}[]>,
+      type: Array as PropType<{ id: number; content: string}[]>,
       required: true
     }
   },
@@ -55,13 +55,12 @@ export default defineComponent({
   setup(props) {
     const { array } = toRefs(props);
     const len = array.value.length;
-    const picPath = '/hello/123.jpg';
     const question = ref(0);
     const answers = ref<string[]>(Array(len).fill(""));
     const user =  reactive({
       name: '',
       description: '',
-      picPath: picPath
+      picPath: ''
     });
     const showAns = () => {
       console.log(collect())
@@ -69,7 +68,7 @@ export default defineComponent({
     const collect = () => {
       const result:Array<{id: number, answer: string}> = []
       array.value.forEach((i, index) => result.push({id: i.id, answer: answers.value[index]}))
-      return {user: {name: user.name, description: user.description, path: user.picPath},  answers: result}
+      return {user: {name: user.name, description: user.description, path: user.picPath}, answers: result}
     };
 
     const isNull = computed(() => {
@@ -88,11 +87,10 @@ export default defineComponent({
       return answers.value[question.value - 2].length;
     });
 
-    let imgPath = '';
     let image = ref();
 
     const pickFile = (event: Event) => {
-      if(event.target.files.length === 0) {
+      if(!(event.target instanceof HTMLInputElement) || !event.target.files?.length) {
         return;
       }
 
@@ -101,7 +99,7 @@ export default defineComponent({
 
       formData.append('photo', image.value)
       ApiService.sendImage(formData).then(res => {
-        imgPath = res.data;
+        user.picPath = res.data;
       });
     }
 
