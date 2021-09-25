@@ -1,24 +1,4 @@
-<<<<<<< HEAD
-let mysql = require('mysql');
-let connection = mysql.createConnection({
-  host: 's148.cyber-folks.pl',
-  user: 'goethe_eden-faceden',
-  password: '#-k^g%IaoK-AS5q2',
-  database: 'goethe_eden-faceden'
-});
-
-connection.connect(function(err) {
-  if (err) {
-    return console.error('error: ' + err.message);
-  }
-
-  console.log('Connected to the MySQL server.');
-});
-
-
-=======
 const cors = require('cors')
->>>>>>> 2fdd65d0658db2cf593d6a9980c7998e3713677f
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
