@@ -17,18 +17,19 @@
         :class="$style['d-n']"
         @input="pickFile"
       >
+      <div :class="$style['imagePreviewWrapper']" :style="{ 'background-image': `url(${previewImage})` }" />
     </div>
-    <template v-for="(item, index) in array" :key="index" >
-    <div v-if="question === index + 2" :class="$style['form__row']">
-      <label :class="$style['form__row--label']" :for="index">{{ item.content }}</label>
-      <input v-model="answers[index]" type="text" :class="$style['form__row--input']" :id="index" autocomplete="off" v-autofocus @keydown.enter="answers[index] && ++question">
+    <template v-for="(item, index) in array">
+    <div v-if="question === index + 2" :class="$style['form__row']" :key="index">
+      <label :class="$style['form__row--label']" :for="index.toString()">{{ item.content }}</label>
+      <input v-model="answers[index]" type="text" :class="$style['form__row--input']" :id="index.toString()" autocomplete="off" v-autofocus @keydown.enter="answers[index] && ++question">
     </div>
     </template>
     <div :class="$style['btns']">
       <button type="button" v-show="question !== len + 2" :class="[$style['btns--piece']]" :disabled="!isNull" @click="question = question + 1">
         Dalej
       </button>
-      <button type="button" v-show="question === len + 2" @click="sendImage" :class="[$style['btns--piece'], $style.bold]" :disabled="isImg">
+      <button type="button" v-show="question === len + 2" @click="sendImage" :class="[$style['btns--piece'], $style.bold]" :disabled="!isImg">
         Zakończ
       </button>
     </div>
@@ -53,13 +54,12 @@ export default defineComponent({
   setup(props) {
     const { array } = toRefs(props);
     const len = array.value.length;
-    const picPath = '/hello/123.jpg';
     const question = ref(0);
     const answers = ref<string[]>(Array(len).fill(""));
     const user =  reactive({
       name: '',
       description: '',
-      picPath: picPath
+      picPath: ''
     });
     const showAns = () => {
       console.log(collect())
@@ -67,7 +67,7 @@ export default defineComponent({
     const collect = () => {
       const result:Array<{id: number, answer: string}> = []
       array.value.forEach((i, index) => result.push({id: i.id, answer: answers.value[index]}))
-      return {user: {name: user.name, description: user.description, path: user.picPath},  answers: result}
+      return {user: {name: user.name, description: user.description, path: user.picPath}, answers: result}
     };
 
     const isNull = computed(() => {
@@ -85,27 +85,37 @@ export default defineComponent({
       return answers.value[question.value - 2].length;
     });
 
-    let image = ref();
     const formData = new FormData();
+    let image = ref();
+    let previewImage = ref();
 
     const pickFile = (event: Event) => {
-      if(event.target.files.length === 0) {
+      if(!(event.target instanceof HTMLInputElement) || !event.target.files?.length) {
         return;
       }
 
       image.value = event.target.files[0];
 
       formData.append('image', image.value)
+
+      if (image.value) {
+        let reader = new FileReader();
+        reader.onload = e => {
+          previewImage.value = e.target.result
+        }
+        reader.readAsDataURL(image.value)
+      }
     }
 
     const sendImage = () => {
-      for (var value of formData.values()) {
-        console.log(value);
-      }
       ApiService.sendImage(formData).then(res => {
         user.picPath = res.data;
       });
     }
+
+    const isImg = computed(() => {
+      return image.value
+    })
 
     return {
       question,
@@ -115,7 +125,9 @@ export default defineComponent({
       showAns,
       isNull,
       pickFile,
-      sendImage
+      sendImage,
+      previewImage,
+      isImg
     }
   }
 })
@@ -186,5 +198,16 @@ export default defineComponent({
 
 .pointer {
   cursor: pointer;
+}
+
+.imagePreviewWrapper {
+  background-repeat: no-repeat;
+    width: 250px;
+    height: 250px;
+    display: block;
+    cursor: pointer;
+    margin: 0 auto 30px;
+    background-size: contain;
+    background-position: center center;
 }
 </style>
