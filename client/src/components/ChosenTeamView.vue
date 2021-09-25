@@ -33,7 +33,7 @@ export default defineComponent({
   },
   setup() {
     const localStorageTeam: string | null = localStorage.getItem('registerTeam')
-    const drawedTeam: Ref<{id: number, name: string} | null> = ref(null)
+    const drawedTeam: Ref<{id: number, name: string} | {}> = ref({})
     const images = ['Unicorn', 'Ghost', 'Dragon', 'Narhval', 'Mushroom', 'Octopus', 'Pigeon', 'Turtle']
 
     if (localStorageTeam) {
@@ -63,13 +63,13 @@ export default defineComponent({
 
   .h2 {
     font-size: 25px;
-    margin: 60px;
+    margin: 60px 15px;
     text-align: center;
     color: #fff;
   }
 
   .image {
-    width: 50vw;
+    width: 40vw;
     padding: 50px;
   }
 
