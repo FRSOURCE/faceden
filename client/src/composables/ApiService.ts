@@ -16,5 +16,8 @@ export default {
     return apiClient.post<string>('/photo', image, {
       headers: { "Content-Type": "multipart/form-data" },
     });
+  },
+  register(data: Record<string, unknown>) {
+    return apiClient.post<{id: number, team: string}>('/register', data)
   }
 }

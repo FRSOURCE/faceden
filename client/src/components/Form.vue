@@ -62,7 +62,7 @@
       <button type="button" v-if="question !== len + 2" :disabled="!isNull" @click="question = question + 1">
         Dalej
       </button>
-      <button type="button" v-else @click="sendImage" :disabled="!isImg">
+      <button type="button" v-else @click="sendImage" :disabled="!isImg || loading">
         Zakończ
       </button>
     </div>
@@ -77,14 +77,16 @@ export default defineComponent({
   name: 'Form',
   props: {
     array: {
-      type: Array as PropType<{ id: number; question: string}[]>,
+      type: Array as PropType<{ id: number; content: string}[]>,
       required: true
     }
   },
   directives: {
     autofocus: (element) => element.focus(),
   },
-  setup(props) {
+  emits: ['navTo'],
+  setup(props, { emit }) {
+    const loading = ref(false);
     const { array } = toRefs(props);
     const len = array.value.length;
     const question = ref(0);
@@ -135,9 +137,15 @@ export default defineComponent({
     }
 
     const sendImage = () => {
+      loading.value = true;
       ApiService.sendImage(formData).then(res => {
         user.picPath = res.data;
-      });
+        ApiService.register(collect()).then(res => {
+          localStorage.setItem('registerTeam', JSON.stringify(res.data));
+          emit('navTo', 'ChosenTeamView');
+          loading.value = false;
+        });
+      }).catch(()=> loading.value = false);
     }
 
     const isImg = computed(() => {
@@ -145,6 +153,7 @@ export default defineComponent({
     })
 
     return {
+      loading,
       question,
       len,
       user,
@@ -179,7 +188,7 @@ export default defineComponent({
     
     &--label {
       text-align: center;
-      font-size: 2rem;
+      font-size: 1.5rem;
       margin-bottom: 1rem;
     }
 

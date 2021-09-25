@@ -108,7 +108,7 @@ async function addUser(data) {
             const teamQuery = mysql.format(selectTeamQuery, [userCount[0].id]);
 
             teamData = await new Promise ((resolve) => {
-                    connection.query(teamQuery, (err, res) =>{
+                connection.query(teamQuery, (err, res) =>{
                     if (err) return console.log(err);
                     const teamTable = [];
                     teamTable.push(res[0].id);
@@ -129,22 +129,25 @@ async function addUser(data) {
 
             const addAnswerQuery = 'INSERT INTO answers (??, ??, ??) VALUES (?, ?, ?)';
 
-            answers.forEach(element => {
+            await Promise.all(answers.map(element => new Promise(resolve => {
                 const answerQuery = mysql.format(addAnswerQuery, ["user_id", "question_id", "answer", insertedId, element.id, element.answer]);
 
                 connection.query(answerQuery, (err, res) => {
                     if (err) return console.log(err);
+                    resolve();
                 });
-            });
+            })));
+
+            console.log(teamData);
+            resolve(teamData);
         });
-        resolve(teamData);
-    });  
+    });
 };
 
 let data = {
     answers: [{id: 1, answer: 'Nie wiem'}, {id: 2, answer: 'Andrzej kolejny odpowiada'}],
     user: {
-        name: 'Andrz.',
+        name: 'Andrzejek',
         description: 'Jestem Andrzej.',
         picture_path: 'costam/tam/czwartyAndrzej.png'
     }
@@ -153,22 +156,5 @@ let data = {
 // addUser(data);
 
 
-function zapis() {
-    imageData = 'chujcipa';
-    imageName = Math.random().toString(36).substr(2) + '.jpg';
-    let path = __dirname + '\\public\\images\\' + imageName;
-
-    while(fs.existsSync(path)) {
-      imageName = Math.random().toString(36).substr(2);
-      path = 'public/images/' + imageName;
-    }
-
-    fs.writeFile(path, imageName, function(err) {
-      if(err) {
-          return console.log(err);
-      }
-      console.log("The file was saved!");
-    }); 
-}
 
 addUser(data);

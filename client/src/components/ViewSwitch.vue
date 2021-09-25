@@ -2,7 +2,7 @@
 <template>
   <div>
     <StartingScreen v-if="visibleScreen === Screen.StartingScreen" @navTo="navigate" />
-    <Form :array="questions" v-else-if="visibleScreen === Screen.Form" />
+    <Form :array="questions" v-else-if="visibleScreen === Screen.Form" @navTo="navigate" />
     <ChosenTeamView  v-else-if="visibleScreen === Screen.ChosenTeamView" />
   </div>
 </template>

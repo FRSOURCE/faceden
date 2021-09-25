@@ -11,8 +11,7 @@ export default defineComponent({
   components: {
     ViewSwitch
   }
-})
-
+});
 </script>
 
 <style lang="scss" src='../node_modules/reset-css/sass/_reset.scss'></style>
