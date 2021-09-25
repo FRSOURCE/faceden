@@ -1,11 +1,3 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  name: 'ChosenTeamView'
-})
-</script>
-
 <template>
   <div :class="$style.container">
     <h2 :class="$style.h2">Gratulacje zostałeś przydzielony do ...!</h2>
@@ -15,6 +7,14 @@ export default defineComponent({
     <h2 :class="$style.h2">Zapamiętaj swoją drużynę!</h2>
   </div>
 </template>
+
+<script lang="ts">
+import { defineComponent } from 'vue'
+
+export default defineComponent({
+  name: 'ChosenTeamView'
+})
+</script>
 
 <style module lang="scss">
   .container {

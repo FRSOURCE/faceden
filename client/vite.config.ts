@@ -12,5 +12,13 @@ export default defineConfig({
         replacement: path.resolve(__dirname, 'src')
       }
     ]
+  },
+  server: {
+    proxy: {
+      '^/api-faceden' : {
+        target: 'https://mvu.pl',
+        changeOrigin: true
+      }
+    },
   }
 })

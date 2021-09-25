@@ -1,8 +1,18 @@
+
+<template>
+  <div>
+    <StartingScreen v-if="visibleScreen === Screen.StartingScreen" @navTo="navigate" />
+    <Form :array="questions" v-else-if="visibleScreen === Screen.Form" />
+    <ChosenTeamView  v-else-if="visibleScreen === Screen.ChosenTeamView" />
+  </div>
+</template>
+
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import StartingScreen from '@/components/StartingScreen.vue'
 import ChosenTeamView from '@/components/ChosenTeamView.vue'
 import Form from '@/components/Form.vue'
+import ApiService from '../composables/ApiService'
 
 enum Screen {
   StartingScreen,
@@ -19,28 +29,24 @@ export default defineComponent({
   },
   setup () {
     const visibleScreen = ref(Screen.StartingScreen)
-    const array = [{id:1, question:'uno'},{id:2, question:'due'},{id:3, question:'tre'},{id:4, question:'quatro'},{id:5, question:'cinque'},{id:6, question:'sei'},{id:7, question:'sette'},{id:8, question:'otto'} ,{id:9, question:'nove'},{id:10, question:'dieci'}]
     const navigate = (name: keyof typeof Screen) => {
       visibleScreen.value = Screen[name]
     }
+    const questions = ref();
+
+    ApiService.getQuestions().then((res) => {
+      questions.value = res.data;
+    })
+    
     return {
       visibleScreen,
       Screen,
       navigate,
-      array
+      questions
     }
   }
 })
 </script>
-
-<template>
-  <div>
-    <StartingScreen v-if="visibleScreen === Screen.StartingScreen" @navTo="navigate" />
-    <Form :array="array" v-else-if="visibleScreen === Screen.Form" />
-    <ChosenTeamView  v-else-if="visibleScreen === Screen.ChosenTeamView" />
-  </div>
-</template>
-
 
 <style lang="scss">
 
