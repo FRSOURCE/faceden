@@ -70,6 +70,7 @@
 </template>
 
 <script lang="ts">
+import { emit } from 'process';
 import { computed, defineComponent, PropType, reactive, ref, toRefs } from 'vue';
 import ApiService from '../composables/ApiService'
 
@@ -84,7 +85,8 @@ export default defineComponent({
   directives: {
     autofocus: (element) => element.focus(),
   },
-  setup(props) {
+  emits: ['navTo'],
+  setup(props, { emit }) {
     const { array } = toRefs(props);
     const len = array.value.length;
     const question = ref(0);
@@ -137,6 +139,9 @@ export default defineComponent({
     const sendImage = () => {
       ApiService.sendImage(formData).then(res => {
         user.picPath = res.data;
+        ApiService.register(collect()).then(res => {
+          emit('navTo', res.data);
+        });
       });
     }
 

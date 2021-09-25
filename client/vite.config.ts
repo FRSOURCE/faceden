@@ -15,6 +15,11 @@ export default defineConfig({
     ],
   },
   server: {
-    port: 3001
+    proxy: {
+      '^/api-faceden' : {
+        target: 'https://mvu.pl/',
+        changeOrigin: true
+      }
+    },
   }
 })

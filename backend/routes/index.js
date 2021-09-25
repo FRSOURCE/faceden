@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { establishConnection } = require('../utils/connection');
 const fs = require('fs');
 const multer = require('multer');
+const path = require('path');
 
 const router = express.Router();
 
@@ -32,55 +33,25 @@ const imageUpload = multer({
 }); 
 
 router.post('/photo', imageUpload.single('image'), async (req, res) => {
-
-  res.status(200).send({text: "dziala"});
-    res.send(req.file.path);
     console.log('file path: ' + req.file.path);
-  }, (error, req, res, next) => {
-    res.status(400).send({ error: error.message })
-
+    return res.send(req.file.path);
 });
 
-// router.post('/photo', async (req, res) => { 
-//     if (!req) res.status(403).send('Błędne dane.');
-//     const connection = await establishConnection()
-//       .catch(() => undefined);
 
-//     if (!connection) return res.sendStatus(500);
-
-//     imageData = req.image;
-//     imageName = Math.random().toString(36).substr(2) + '.jpg';
-//     let path = __dirname +'/public/images/' + imageName;
-
-//     while(fs.existsSync(path)) {
-//       imageName = Math.random().toString(36).substr(2);
-//       path = __dirname + 'public/images/' + imageName;
-//     }
-
-//     fs.writeFile(path, imageData, 'binary', function(err) {
-//       if(err) {
-//           return console.log(err);
-//       }
-//       console.log("The file was saved!");
-//     }); 
-
-//     return res.status(200).send(path);
-
-// });
-
-router.post('/form', async (req, res) => {
+router.post('/register', async (req, res) => {
         if (!req) res.status(403).send('Błędne dane.');
         const connection = await establishConnection()
             .catch(() => undefined);
         
         if (!connection) return res.sendStatus(500);
 
-        addUser(req);
-
-        connection.end();
+        const teamData = await addUser(req.body, connection);
 
         res.status(200)
-            .send('success');
+            .send({id: teamData[0], team: teamData[1]});
+
+        
+        connection.end();
 });
 
 function compare( a, b ) {
@@ -103,65 +74,65 @@ function addAnswer(data, userId) {
     });
 }
 
-async function addUser(data, teamData) {
-    
-  const teamTable = teamData;
-  const user = data.user;
-  const answers = data.answers;
-
-  // check available teams
-
-  const teamQuery = 'SELECT id, user_count from teams LEFT JOIN (SELECT team_id, COUNT(*) AS user_count FROM users GROUP BY team_id) team_counts ON teams.id = team_counts.team_id;';
-  
-  connection.query(teamQuery, async (err, response) => {
-      if(err) return console.log(err);
+async function addUser(data, connection) {
+  return new Promise((resolve) => {  
+      const user = data.user;
+      const answers = data.answers;
+      let teamData;
+      // check available teams
       
-      let userCount = response;
-      userCount.sort((a,b) => a.user_count - b.user_count );
 
-      console.log(response);
-
-      const addUserQuery = 'INSERT INTO users (??, ??, ??, ??) value (?, ?, ?, ?)';
-      const userQuery = mysql.format(addUserQuery, ["name","description","picture_path", "team_id", user.name, user.description, user.picture_path, userCount[0].id]);
-
-
-      const selectTeamQuery = 'SELECT id, name FROM teams WHERE id = ?';
-      const teamQuery = mysql.format(selectTeamQuery, [userCount[0].id]);
-
+      const teamQuery = 'SELECT id, user_count from teams LEFT JOIN (SELECT team_id, COUNT(*) AS user_count FROM users GROUP BY team_id) team_counts ON teams.id = team_counts.team_id;';
       
-      connection.query(teamQuery, (err, res) => {
-        if (err) return console.log(err);
-        const teamTable = [];
-        teamTable.push(res[0].id);
-        teamTable.push(res[0].name);
-        console.log("druzyna: ", teamTable)
-      });
+      connection.query(teamQuery, async (err, response) => {
+          if(err) return console.log(err);
+          
+          let userCount = response;
+          userCount.sort((a,b) => a.user_count - b.user_count );
 
-      const insertedId = await new Promise((resolve) => {
-          connection.query(userQuery, (err, res) => {
-              if (err) return console.log(err);
+          console.log(response);
 
-              console.log(res.insertId);
-              resolve(res.insertId);
+          const addUserQuery = 'INSERT INTO users (??, ??, ??, ??) value (?, ?, ?, ?)';
+          const userQuery = mysql.format(addUserQuery, ["name","description","picture_path", "team_id", user.name, user.description, user.path, userCount[0].id]);
+
+          const selectTeamQuery = 'SELECT id, name FROM teams WHERE id = ?';
+          const teamQuery = mysql.format(selectTeamQuery, [userCount[0].id]);
+
+          teamData = await new Promise ((resolve) => {
+              connection.query(teamQuery, (err, res) =>{
+                  if (err) return console.log(err);
+                  const teamTable = [];
+                  teamTable.push(res[0].id);
+                  teamTable.push(res[0].name);
+                  console.log("druzyna: ", teamTable)
+                  resolve(teamTable);
+              });
           });
-      });
 
-      const addAnswerQuery = 'INSERT INTO answers (??, ??, ??) VALUES (?, ?, ?)';
+          const insertedId = await new Promise((resolve) => {
+              connection.query(userQuery, (err, res) => {
+                  if (err) return console.log(err);
 
-      answers.forEach(element => {
-          console.log('chuj jebać: ', insertedId)
-          const answerQuery = mysql.format(addAnswerQuery, ["user_id", "question_id", "answer", insertedId, element.id, element.answer]);
-
-          connection.query(answerQuery, (err, res) => {
-              if (err) return console.log(err);
-  
-              console.log(res.insertId);
+                  console.log(res.insertId);
+                  resolve(res.insertId);
+              });
           });
+
+          const addAnswerQuery = 'INSERT INTO answers (??, ??, ??) VALUES (?, ?, ?)';
+
+          await Promise.all(answers.map(element => new Promise(resolve => {
+              const answerQuery = mysql.format(addAnswerQuery, ["user_id", "question_id", "answer", insertedId, element.id, element.answer]);
+
+              connection.query(answerQuery, (err, res) => {
+                  if (err) return console.log(err);
+                  resolve();
+              });
+          })));
+
+          console.log(teamData);
+          resolve(teamData);
       });
   });
-
-  // sort and pick least members
-
 };
 
 module.exports = router;
