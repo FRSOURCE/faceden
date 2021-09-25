@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mysql = require('mysql');
+const { establishConnection } = require('../utils/connection');
 
 function fyShuffle(a) {
     if (a.length < 2) return;
@@ -12,60 +13,45 @@ function fyShuffle(a) {
     }
 };
 
-router.get('/', (req, res) => {
+function chooseQuestions(data, chosenIndexes, count = 5) {
+    const selectedQuestions = [];
 
+    for (let i = 0; i < count; ++i) {
+        const randNum = Math.floor(Math.random() * data.length);
+        if (chosenIndexes.includes(randNum)) {
+            --i;
+            continue;
+        }
+        selectedQuestions
+            .push({"id": data[randNum].id, "content": data[randNum].content});
+        chosenIndexes.push(randNum);
+    }
+
+    return selectedQuestions;
+}
+
+router.get('/', async (req, res) => {
     if (!req) res.status(403).send('Błędne dane.');
-
-    let connection = mysql.createConnection({
-        host: 's148.cyber-folks.pl',
-        user: 'goethe_eden-faceden',
-        password: '#-k^g%IaoK-AS5q2',
-        database: 'goethe_eden-faceden',
-        multipleStatements: true
-    });
+    const connection = await establishConnection()
+        .catch(() => undefined);
     
-    connection.connect(function(err) {
-        if (err) return console.log(err);
-    
-        console.log('Connected to the MySQL server.');
-    });
+    if (!connection) return res.sendStatus(500);
       
-    const selectQueryRand = 'SELECT * FROM ?? WHERE is_random = 0';
-    const selectQueryNoRand = 'SELECT * FROM ?? WHERE is_random = 1';    
+    const selectQueryRand = 'SELECT * FROM ?? WHERE is_random = ?';
+    const selectQueryNoRand = 'SELECT * FROM ?? WHERE is_random = ?';    
 
-    const queryRand = mysql.format(selectQueryRand, ["questions"]);
-    const queryNoRand = mysql.format(selectQueryNoRand, ["questions"]);
+    const queryRand = mysql.format(selectQueryRand, ["questions", 1]);
+    const queryNoRand = mysql.format(selectQueryNoRand, ["questions", 0]);
 
     connection.query(`${queryRand};${queryNoRand}`, (err, results) => {
         if(err) return console.log(err);
     
-        const selectedQuestions = [];
         const dataRand = results[0];
         const dataNoRand = results[1];
         let chosenIndexes = [];
 
-        for (let i = 0; i < 5; ++i) {
-            const randNum = Math.floor(Math.random() * dataRand.length);
-            if (chosenIndexes.includes(randNum)) {
-                --i;
-                continue;
-            }
-            selectedQuestions
-                .push({"id": dataRand[randNum].id, "content": dataRand[randNum].content});
-            chosenIndexes.push(randNum);
-        }
-
-
-        for (let i = 0; i < 5; ++i) {
-            const randNum = Math.floor(Math.random() * dataNoRand.length);
-            if (chosenIndexes.includes(randNum)) {
-                --i;
-                continue;
-            }
-            selectedQuestions
-                .push({"id": dataNoRand[randNum].id, "content": dataNoRand[randNum].content});
-            chosenIndexes.push(randNum);
-        }
+        const selectedQuestions = chooseQuestions(dataRand, chosenIndexes)
+            .concat(chooseQuestions(dataNoRand, chosenIndexes));
 
         fyShuffle(selectedQuestions);
         connection.end();
