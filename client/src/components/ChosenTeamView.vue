@@ -4,7 +4,7 @@
     <div :class="$style['image-box']"> 
       <component :is="svgName" :class="$style.image" />
     </div>
-    <h2 :class="$style.h2">Zapamiętaj swoją drużynę!</h2>
+    <button type="button" :class="$style['button-run-form']" @click="navigateTo('LookingForGameView')">Rozpocznij rozgrywkę!</button>
   </div>
 </template>
 
@@ -31,7 +31,8 @@ export default defineComponent({
     Pigeon,
     Turtle
   },
-  setup() {
+  emits: ['navTo'],
+  setup(_props, { emit }) {
     const localStorageTeam: string | null = localStorage.getItem('registerTeam')
     const drawedTeam: Ref<{id?: number, name?: string}> = ref({})
     const images = ['Unicorn', 'Ghost', 'Dragon', 'Narhval', 'Mushroom', 'Octopus', 'Pigeon', 'Turtle']
@@ -47,7 +48,8 @@ export default defineComponent({
 
     return {
       svgName,
-      drawedTeam
+      drawedTeam,
+      navigateTo: (name: string) => emit('navTo', name)
     }
   }
 })
@@ -70,6 +72,7 @@ export default defineComponent({
 
   .image {
     width: 40vw;
+    height: 40vw;
     padding: 50px;
   }
 
@@ -80,5 +83,20 @@ export default defineComponent({
 
   .c-green {
     color: #0eff6e;
+  }
+
+  .button-run-form {
+    padding: 15px;
+    margin: 30px 15px;
+    font-size: 24px;
+    border: thin solid #000;
+    cursor: pointer;
+    color: #fff;
+    background-color: #000;
+
+    &:hover {
+      color: #000;
+      background-color: #0eff6e;
+    }
   }
 </style>
