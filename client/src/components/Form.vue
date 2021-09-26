@@ -29,6 +29,7 @@
       <div :class="$style['textarea-info']">pozostało {{ 400 - user.description.length }} znaków</div>
     </div>
     <div v-else-if="question === len + 2" :class="$style['form__row']">
+      <label :class="$style['form__row--label']">Prześlij zdjęcie/obrazek, które przedstawia "Ciebie"</label>
       <label :class="[$style['form--upload'], $style['pointer']]" for="avatar">Wyślij obraz</label>
       <input
         type="file"
